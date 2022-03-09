@@ -19,8 +19,10 @@
 package org.apache.pinot.controller.helix;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import org.apache.helix.model.ExternalView;
+import org.apache.helix.model.IdealState;
 import org.apache.pinot.common.utils.config.TagNameUtils;
 import org.apache.pinot.common.utils.helix.HelixHelper;
 import org.apache.pinot.controller.ControllerTestUtils;
@@ -85,8 +87,9 @@ public class ControllerInstanceToggleTest {
 
     // Disable server instances
     int numEnabledInstances = ControllerTestUtils.NUM_SERVER_INSTANCES;
-    for (String instanceName : ControllerTestUtils
-        .getHelixAdmin().getInstancesInClusterWithTag(ControllerTestUtils.getHelixClusterName(), SERVER_TAG_NAME)) {
+    List<String> instanceNames = ControllerTestUtils.getHelixAdmin()
+        .getInstancesInClusterWithTag(ControllerTestUtils.getHelixClusterName(), SERVER_TAG_NAME);
+    for (String instanceName : instanceNames) {
       toggleInstanceState(instanceName, "disable");
       numEnabledInstances--;
       checkNumOnlineInstancesFromExternalView(OFFLINE_TABLE_NAME, numEnabledInstances);
@@ -148,6 +151,8 @@ public class ControllerInstanceToggleTest {
     while (System.currentTimeMillis() < endTime) {
       ExternalView resourceExternalView = ControllerTestUtils
           .getHelixAdmin().getResourceExternalView(ControllerTestUtils.getHelixClusterName(), resourceName);
+      IdealState idealState = HelixHelper.getTableIdealState(ControllerTestUtils.getHelixManager(), resourceName);
+      System.out.println("Ideal state: " + idealState);
       Set<String> instanceSet = HelixHelper.getOnlineInstanceFromExternalView(resourceExternalView);
       if (instanceSet.size() == expectedNumOnlineInstances) {
         return;

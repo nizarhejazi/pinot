@@ -153,7 +153,9 @@ public class SegmentLineageCleanupTest {
 
     // Validate the case when the lineage entry state is 'COMPLETED' and all segments are deleted.
     ControllerTestUtils.getHelixResourceManager().deleteSegment(OFFLINE_TABLE_NAME, "merged_0");
-    waitForSegmentsToDelete(OFFLINE_TABLE_NAME, 4);
+    long startTime = System.currentTimeMillis();
+    waitForSegmentsToDelete(OFFLINE_TABLE_NAME, 4, 100_000L);
+    System.out.println("Time to take: " + (System.currentTimeMillis() - startTime));
     _retentionManager.processTable(OFFLINE_TABLE_NAME);
     waitForSegmentsToDelete(OFFLINE_TABLE_NAME, 4);
     segmentsForTable = ControllerTestUtils.getHelixResourceManager().getSegmentsFor(OFFLINE_TABLE_NAME, false);
@@ -230,8 +232,9 @@ public class SegmentLineageCleanupTest {
       throws InterruptedException {
     long endTimeMs = System.currentTimeMillis() + timeOutInMillis;
     do {
-      if (ControllerTestUtils.getHelixResourceManager().getSegmentsFor(tableNameWithType, false).size()
-          == expectedNumSegmentsAfterDelete) {
+      List<String> segments = ControllerTestUtils.getHelixResourceManager().getSegmentsFor(tableNameWithType, false);
+      System.out.println("Segments: " + segments + ". Size: " + segments.size());
+      if (segments.size() == expectedNumSegmentsAfterDelete) {
         return;
       } else {
         Thread.sleep(500L);

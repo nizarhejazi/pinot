@@ -51,7 +51,7 @@ import static org.testng.Assert.*;
 public class PinotTaskManagerStatelessTest extends ControllerTest {
   private static final String RAW_TABLE_NAME = "myTable";
   private static final String OFFLINE_TABLE_NAME = TableNameBuilder.OFFLINE.tableNameWithType(RAW_TABLE_NAME);
-  private static final long TIMEOUT_IN_MS = 10_000L;
+  private static final long TIMEOUT_IN_MS = 30_000L;
 
   @BeforeClass
   public void setUp()
